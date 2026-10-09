@@ -1,0 +1,28 @@
+project: forex-intelligence-lab
+status: research_only
+universe: [EURUSD, USDJPY, GBPUSD]
+requested_timeframes: [M15, M30, H1, H4, D1]
+currently_verified_data: FRED_H10_DAILY_INDICATIVE
+first_date_target: '1999-01-01'
+last_date_target: '2026-10-09'
+backtest_engine_candidate: quantconnect_lean
+broker_bridge_candidate: mt5_python
+algorithmic_execution: disabled
+live_orders: disabled
+confidence_claims: forbidden_without_out_of_sample_evidence
+strategy_hypotheses:
+  - trend_following
+  - volatility_breakout
+  - regime_conditioned_mean_reversion
+model_search:
+  log_all_attempts: true
+  train_validation_test_split: time_ordered
+  final_holdout_access: locked_until_final
+  seek_high_win_rate: true
+  optimize_win_rate_alone: false
+risk_gate:
+  max_loss_daily: design_pending
+  max_total_drawdown: design_pending
+  correlation_exposure_cap: design_pending
+  risk_per_trade: design_pending
+  fail_closed_without_verified_feed: true

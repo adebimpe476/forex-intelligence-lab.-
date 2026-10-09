@@ -1,0 +1,13 @@
+{
+ "provider": "FRED via Firecrawl Alexandria series/observations",
+ "underlying_source": "Board of Governors of the Federal Reserve System (US), H.10 Foreign Exchange Rates",
+ "retrieved_vintage": "2026-10-08",
+ "series": {"EURUSD":"DEXUSEU", "USDJPY":"DEXJPUS", "GBPUSD":"DEXUSUK"},
+ "units": {"EURUSD":"USD per EUR", "USDJPY":"JPY per USD", "GBPUSD":"USD per GBP"},
+ "frequency": "daily", "fixing_description": "Indicative New York noon buying rates, not tradable bid/ask quotes",
+ "query_dates": ["2026-09-01", "2026-10-09"],
+ "last_available_date": "2026-10-02",
+ "missing_mark": ". from upstream stored as empty field",
+ "sources": ["https://fred.stlouisfed.org/series/DEXUSEU", "https://fred.stlouisfed.org/series/DEXJPUS", "https://fred.stlouisfed.org/series/DEXUSUK"],
+ "restrictions": "Research snapshot only. Review underlying FRED/FRB rights and attribution before redistribution. Do not mistake for intraday or broker-executable prices."
+}

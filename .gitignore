@@ -1,0 +1,23 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+.env
+.env.*
+*.log
+*.sqlite
+*.db
+!data/raw/fred_h10_daily_snapshot_2026-10-08.csv
+# Full licensed datasets should be stored in controlled object storage, not Git history.
+data/raw/fred-full/
+data/processed/*.parquet
+data/processed/*.csv
+# Licensed quotes, provider archives and generated staging data remain outside Git history.
+*.bi5
+data/raw/approved/
+data/raw/dukascopy/
+data/processed/
+!data/raw/fred_h10_daily_snapshot_2026-10-08.csv
+
+# Never commit local experiment logs, trial results, license-restricted datasets
+artifacts/

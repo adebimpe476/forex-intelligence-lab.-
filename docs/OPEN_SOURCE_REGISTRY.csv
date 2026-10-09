@@ -1,0 +1,11 @@
+project,github_url,role,license_evidence,priority,decision,risk_or_next_check
+QuantConnect LEAN,https://github.com/QuantConnect/Lean,Primary professional backtest engine,Apache-2.0,1,Selected for integration spike,CLI paid-tier requirements and historical-data licensing must be validated
+MetaTrader5 Python API,https://www.mql5.com/en/docs/python_metatrader5,Authorized broker feed and execution bridge,Broker and MetaQuotes terms,1,Selected for sandbox spike,Windows terminal required; broker execution rules need tests
+NautilusTrader,https://github.com/nautechsystems/nautilus_trader,Event-driven engine alternative,LGPL-3.0,2,Watch and compare,Community MT5 adapter; V2 maturity and compatibility
+Microsoft Qlib,https://github.com/microsoft/qlib,AI research experiments,MIT,2,Research candidate,Default equity workflow needs custom FX adapters
+Microsoft RD-Agent,https://github.com/microsoft/RD-Agent,Automated hypothesis experiments,Check exact revision,3,Research candidate,High risk of data snooping if uncontrolled
+EA31337 Strategies,https://github.com/EA31337/EA31337-strategies,Study MQL4 and MQL5 strategy code,GPL-3.0,2,Reference only,Do not copy into proprietary code without license review
+VectorBT,https://github.com/polakowo/vectorbt,Fast prototyping and research,Confirm commercial restrictions,2,Review before use,May impose Commons Clause commercial restrictions
+pysystemtrade,https://github.com/robcarver17/pysystemtrade,Volatility and risk research,Review exact LICENSE,2,Research candidate,Not a ready-made MT5 engine
+Lightweight Charts,https://github.com/tradingview/lightweight-charts,Mobile web candlestick visualization,Apache-2.0 with required notices review,1,Selected frontend candidate,Native OHLC/tick feed still required
+Awesome Quant,https://github.com/wilsonfreitas/awesome-quant,Curated repository discovery,Directory links individually licensed,3,Research map,Curated not performance evidence
