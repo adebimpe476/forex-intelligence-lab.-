@@ -23,11 +23,11 @@ def main(argv=None):
     p.add_argument("--pair", choices=list(SERIES), default="EURUSD")
     p.add_argument("--strategy", choices=list(STRATEGIES), default="trend_following")
     p.add_argument("--cost-bps", type=float, default=2.)
-    p = sub.add_parser("import-daily-bi5", help="Decode a rights-cleared local daily BI5 file; no network or orders")
-    p.add_argument("file", help="Local DD_ticks.bi5 path")
+    p = sub.add_parser("import-daily-bi5", help="Decode licensed local daily BI5 file; no downloading or orders")
+    p.add_argument("file", help="Local current-layout DD_ticks.bi5")
     p.add_argument("--pair", choices=list(SERIES), required=True)
-    p.add_argument("--day-utc", required=True, help="Exact UTC midnight e.g. 2024-01-02T00:00:00Z")
-    p.add_argument("--rights-note", required=True, help="Provider rights review and permitted research use")
+    p.add_argument("--day-utc", required=True, help="Exact UTC midnight, e.g. 2024-01-02T00:00:00Z")
+    p.add_argument("--rights-note", required=True, help="Describe provider permission and allowed local use")
     p.add_argument("--out", default="data/processed/dukascopy-daily")
     p = sub.add_parser("resample-ticks", help="Validate real bid/ask tick CSV and produce observed UTC bars; never trade")
     p.add_argument("file", help="CSV columns timestamp_utc,bid,ask with timezone-aware timestamps")
@@ -44,6 +44,23 @@ def main(argv=None):
     p.add_argument("--pair", choices=["EURUSD", "GBPUSD", "USDJPY"], required=True)
     p.add_argument("--market", required=True, help="True source venue ID; do not mislabel as OANDA or FXCM")
     p.add_argument("--out", default="data/processed/lean-staging")
+    p = sub.add_parser("research-size", help="Research-only USD FX position sizing; NEVER sends orders")
+    p.add_argument("--signal-id", required=True)
+    p.add_argument("--pair", choices=["EURUSD", "GBPUSD", "USDJPY"], required=True)
+    p.add_argument("--side", choices=["BUY", "SELL"], required=True)
+    p.add_argument("--entry", required=True, help="Hypothetical executable ask for BUY / bid for SELL")
+    p.add_argument("--stop", required=True, help="Hypothetical executable closing-side stop")
+    p.add_argument("--equity-usd", required=True)
+    p.add_argument("--day-start-equity-usd", required=True)
+    p.add_argument("--daily-realized-pnl-usd", default="0")
+    p.add_argument("--daily-unrealized-pnl-usd", default="0")
+    p.add_argument("--open-risk-usd", default="0")
+    p.add_argument("--open-position", action="append", default=[], help="Repeat existing PAIR:SIDE")
+    p.add_argument("--seen-id", action="append", default=[])
+    p = sub.add_parser("session-bars", help="Create NY-17 rollover D1/H4 research candles from local tick CSV")
+    p.add_argument("file", help="CSV with timezone-aware timestamp_utc,bid,ask")
+    p.add_argument("--timeframe", choices=["D1", "H4"], default="D1")
+    p.add_argument("--out", default="data/processed/ny-session")
     args = parser.parse_args(argv)
     if args.cmd == "fetch-fred":
         result = fetch_fred_daily(Path(args.out), args.start, args.end)
@@ -63,6 +80,35 @@ def main(argv=None):
         df = pd.read_csv(args.file, dtype={"timestamp_utc": "string"})
         result = to_lean_forex_tick_zips(df, pair=args.pair,
                                           market=args.market, out_dir=Path(args.out))
+    elif args.cmd == "research-size":
+        from .risk import assess_risk
+        positions = []
+        for item in args.open_position:
+            parts = item.split(":")
+            if len(parts) != 2:
+                parser.error("--open-position must be PAIR:SIDE")
+            positions.append((parts[0], parts[1]))
+        result = assess_risk(signal_id=args.signal_id, pair=args.pair, side=args.side,
+                             entry=args.entry, stop=args.stop, equity_usd=args.equity_usd,
+                             day_start_equity_usd=args.day_start_equity_usd,
+                             day_realized_pnl_usd=args.daily_realized_pnl_usd,
+                             day_unrealized_pnl_usd=args.daily_unrealized_pnl_usd,
+                             open_risk_usd=args.open_risk_usd,
+                             open_positions=positions, seen_signal_ids=args.seen_id)
+    elif args.cmd == "session-bars":
+        from .tickdata import validate_ticks
+        from .fx_sessions import session_bars
+        raw = pd.read_csv(args.file, dtype={"timestamp_utc": "string"})
+        clean, quality = validate_ticks(raw)
+        bars = session_bars(clean, args.timeframe)
+        directory = Path(args.out)
+        directory.mkdir(parents=True, exist_ok=True)
+        destination = directory / f"{Path(args.file).stem}_{args.timeframe}_ny17_research.csv"
+        bars.to_csv(destination, index=False)
+        result = {"file": str(destination), "timeframe": args.timeframe,
+                  "observed_bars": len(bars), "quality": quality,
+                  "session_convention": "NY 17:00; verify vs broker; variable H4 UTC duration at DST",
+                  "research_only": True, "execution_allowed": False}
     elif args.cmd == "audit":
         result = audit_indicative_csv(Path(args.file))
     else:
