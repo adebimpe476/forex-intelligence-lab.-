@@ -78,6 +78,10 @@ In addition to open-source infrastructure, the project now contains **our own** 
 
 An original bounded parser for Dukascopy hourly BI5 bid/ask quote files and a deterministic native LEAN Forex quote-tick ZIP exporter are now implemented and regression tested. They work on **locally supplied, rights-reviewed files**, not by automatically harvesting the provider feed. No genuine source file was downloaded in this environment, and no actual LEAN backtest was run. See [data acquisition acceptance and exact commands](docs/DATA_ACQUISITION_V0_4.md). Data files and generated ZIPs are excluded from Git.
 
-## V0.5: Daily Dukascopy tick data format (research-only)
+## V0.5: Current daily BI5 layout correction (research-only)
 
-The official provider reference describes a current daily BI5 layout with timestamps anchored at **00:00 UTC**, different from our v0.4 legacy hourly layout. Added [an explicit daily importer](src/forexlab/dukascopy_daily.py), [synthetic tests](tests/test_dukascopy_daily.py) and [rights-controlled import instructions](docs/DAILY_BI5_IMPORT_V0_5.md). Run `forexlab import-daily-bi5 --help` for the new CLI. **No real daily BI5 source file has been acquired or verified, no LEAN backtest has run, and no broker order may execute.**
+Official Dukascopy documentation distinguishes daily files (`DD_ticks.bi5`, milliseconds since UTC midnight) from older hourly BI5 files (milliseconds since the UTC hour). Use `forexlab import-daily-bi5` for explicitly licensed daily files; do **not** feed them into the hourly decoder. See [daily BI5 import instructions](docs/DAILY_BI5_IMPORT_V0_5.md). Both versions are exercised with synthetic fixtures; actual provider downloads, LEAN engine simulation and MT5 orders have **not** been performed.
+
+## V0.6: original portfolio risk checks and session-clock QA (research-only)
+
+Added [illustrative USD-account risk gate](src/forexlab/risk.py) and [DST-aware New York 17:00 session aggregation](src/forexlab/fx_sessions.py), with CLI tools `forexlab research-size` and `forexlab session-bars`. All output stays **non-executable**, and sample inputs are not live trading signals. The risk gate includes duplicate detection, stop budget/round-down, realized+unrealized daily drawdown, open-risk cap and overlapping USD directional positions. See [limitations and checks](docs/RISK_AND_SESSIONS_V0_6.md). Market-session bars are not yet compatible with the fixed-duration existing strategy signal engine across DST; this is deliberately not wired into live execution or backtesting.
