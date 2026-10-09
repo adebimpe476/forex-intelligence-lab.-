@@ -1,0 +1,4 @@
+series,pair,first_valid,last_valid,observations_in_range,valid,missing,frequency,actual_bytes_saved
+DEXUSEU,EURUSD,1999-01-04,2026-10-02,7240,6960,280,daily,no
+DEXJPUS,USDJPY,1999-01-04,2026-10-02,7241,6960,281,daily,no
+DEXUSUK,GBPUSD,1999-01-04,2026-10-02,7241,6960,281,daily,no
