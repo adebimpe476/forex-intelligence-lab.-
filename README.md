@@ -2,6 +2,8 @@
 
 **Status: RESEARCH ONLY. No live quotes, no AI prediction model, no MT5 account, no actual LEAN integration, and no capability to place trades.**
 
+**v0.9 rights update:** Automated FRED downloads are paused after review of current FRED restrictions on AI/system development and training. Do not train ML on the H.10 source. Only rights-reviewed external market feeds may enter future research, and no source is automatically license-verified. See [Data gate and walk-forward documentation](docs/DATA_QUALIFICATION_WALKFORWARD_V0_9.md).
+
 This is the first practical, locally runnable foundation for the longer-term research → LEAN backtesting → AI → approved live signal → MT5 demo/paper → mobile web control system.
 
 ## Included today
@@ -23,9 +25,8 @@ pip install -e '.[dev]'
 pytest -q
 forexlab audit data/raw/fred_h10_daily_snapshot_2026-10-08.csv
 
-# When your computer has internet access:
-forexlab fetch-fred --out data/raw/fred-full --start 1999-01-01 --end 2026-10-09
-forexlab audit data/raw/fred-full/fred_h10_merged_daily_indicative.csv
+# FRED download is now PAUSED pending review of data-rights terms.
+# Earlier commands remain in source only as historical diagnostics; do not use in AI workflows.
 
 # A deliberately limited daily indicative-reference diagnostic (NOT strategy verification):
 forexlab diagnose data/raw/fred-full/fred_h10_merged_daily_indicative.csv --pair EURUSD --strategy trend_following
@@ -50,8 +51,8 @@ Never commit API keys, trading account passwords or broker credentials. Live ord
 ## ML research scaffold
 Optional `pip install -e '.[ml]'`. `forexlab.ml.make_daily_supervised_sample` generates strictly historical daily features and future direction labels; `fit_research_direction_model` produces time-ordered classification diagnostics, **not** a tradable strategy. It is not trained with the short snapshot and has no live/paper-trading privileges. All hyperparameter experiments must be logged and a final holdout must remain untouched until the final research evaluation.
 
-## GitHub full-history ingestion workflow
-After the v0.2 code is merged into GitHub, use **Actions → Fetch and audit historical FRED daily reference series → Run workflow**. That manually downloads all three daily source histories and stores a 7-day GitHub Actions artifact (not committed to Git history). This workflow has **not run** in the current session, and FRED may refuse or limit remote downloads. Review rate limits and rights. The current container cannot reach FRED directly.
+## FRED source-rights gate
+The old FRED historical download workflow is no longer enabled for data extraction. The current published FRED terms prohibit using FRED Content for software/AI development and training; we need a separate rights-reviewed forex quote provider for ML and any commercial product. No new FRED data has been downloaded by v0.9.
 
 ## V0.2 progress: bid/ask tick validation and multi-timeframe conversion
 
@@ -101,3 +102,6 @@ forexlab simulate-quotes /path/to/rights-reviewed/EURUSD_ticks.csv --pair EURUSD
 ```
 
 The actual input is independently checked by `forexlab.tickdata.validate_ticks`; FRED H.10 daily rates MUST NOT be passed to this CLI. Outputs always include `source_verified=false`, `strategy_validated=false` and `execution_allowed=false`. All published tests currently use synthetic quote fixtures.
+
+## v0.9 — Research dataset qualification and walk-forward validation plans
+The original [data qualification gate](src/forexlab/data_gate.py) verifies input hashes, format, timestamp integrity and purpose-specific declared rights **without falsely certifying a license**. The [walk-forward planner](src/forexlab/walkforward.py) prepares expanding training/test segments with embargo and a reserved final holdout. Both are research-only. Examples and remaining blockers: [docs/DATA_QUALIFICATION_WALKFORWARD_V0_9.md](docs/DATA_QUALIFICATION_WALKFORWARD_V0_9.md).

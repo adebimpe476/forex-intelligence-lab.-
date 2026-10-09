@@ -43,8 +43,17 @@ def chronological_partitions(X: pd.DataFrame, y: pd.Series, gap: int = 2):
             (X.iloc[b+gap:], y.iloc[b+gap:]))
 
 
-def fit_research_direction_model(prices: pd.Series) -> dict:
-    """Fit a fixed baseline. Never tune parameters on final test split."""
+def fit_research_direction_model(prices: pd.Series, *, source_kind: str | None = None,
+                                 license_evidence_reviewed: bool = False) -> dict:
+    """Fit a fixed research baseline ONLY on license-reviewed non-FRED data.
+
+    The model remains unvalidated; the caller is responsible for external rights
+    verification, source records, and independent holdout review.
+    """
+    if source_kind is None or not license_evidence_reviewed:
+        raise ValueError("ML training requires source identity and reviewed license evidence")
+    if "FRED" in source_kind.upper() or "DEXUS" in source_kind.upper() or "DEXJP" in source_kind.upper():
+        raise ValueError("FRED historical content is not approved for AI/ML training")
     from sklearn.dummy import DummyClassifier
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import StandardScaler
@@ -57,7 +66,7 @@ def fit_research_direction_model(prices: pd.Series) -> dict:
     model.fit(Xt, yt)
     dummy = DummyClassifier(strategy='most_frequent').fit(Xt, yt)
     out = {'trained_rows':len(Xt),'validation_rows':len(Xv),'holdout_rows':len(Xe),
-           'model':'fixed LogisticRegression', 'data_type':'indicative daily close only',
+           'model':'fixed LogisticRegression', 'data_type':source_kind,
            'TRADABLE_STRATEGY':False, 'VALIDATED':False,
            'caution':'Directional classifier, no trading execution or costs; accuracy != trading win rate.'}
     for tag,XX,yy in [('validation',Xv,yv),('untouched_holdout',Xe,ye)]:

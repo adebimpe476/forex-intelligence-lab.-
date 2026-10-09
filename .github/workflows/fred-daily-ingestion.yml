@@ -1,32 +1,18 @@
-name: Fetch and audit historical FRED daily reference series
-# Manual research data collection; never creates trading orders.
+name: FRED access terms review — extraction disabled
+# FRED's published terms restrict development/training of AI systems using
+# FRED Content. No automated FRED fetch in this repository until use is
+# independently reviewed, appropriately licensed, and explicitly reauthorized.
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - '.github/workflows/fred-daily-ingestion.yml'
 permissions:
   contents: read
 jobs:
-  fetch-reference-data:
+  terms-review:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install project
-        run: pip install -e .
-      - name: Download all available FRED daily H10 data
-        run: forexlab fetch-fred --out data/raw/fred-full --start 1999-01-01 --end 2026-10-09
-      - name: Audit source coverage
-        run: forexlab audit data/raw/fred-full/fred_h10_merged_daily_indicative.csv | tee data/raw/fred-full/coverage_audit.json
-      - name: Store bounded workflow artifact (not Git history)
-        uses: actions/upload-artifact@v4
-        with:
-          name: fred-h10-daily-1999-2026-source-data
-          path: data/raw/fred-full/
-          retention-days: 7
-          if-no-files-found: error
-# For research context only. No tick data, execution costs, EA, or broker orders.
+      - name: Report disabled reference-data extraction
+        run: |
+          echo 'FRED extraction is paused pending source-rights review.'
+          echo 'See https://fred.stlouisfed.org/legal/'
+          echo 'AI/model training on FRED Content is NOT enabled.'
+          echo 'Use rights-reviewed source manifests for future market datasets.'

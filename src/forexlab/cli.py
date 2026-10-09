@@ -80,9 +80,38 @@ def main(argv=None):
     p.add_argument("--stop-pips", type=float, default=12.0)
     p.add_argument("--take-pips", type=float, default=18.0)
     p.add_argument("--out", help="Optional JSON report file; do not commit licensed quotes")
+    p = sub.add_parser("qualify-data", help="Audit local quote/candle CSV with an external provenance declaration; no trades")
+    p.add_argument("file", help="Local quote tick or OHLC candle CSV")
+    p.add_argument("--manifest", required=True, help="JSON with source, SHA256, declared rights and evidence")
+    p.add_argument("--purpose", choices=["quant_research", "ai_training"], default="quant_research")
+    p = sub.add_parser("walkforward-plan", help="Hash-anchored expanding folds and locked holdout; never fits models")
+    p.add_argument("file", help="Time-ordered tick or candle CSV with timezone-bearing timestamps")
+    p.add_argument("--timestamp-column", choices=["timestamp_utc", "datetime"], default="timestamp_utc")
+    p.add_argument("--min-train", type=int, default=300)
+    p.add_argument("--test-size", type=int, default=60)
+    p.add_argument("--embargo", type=int, default=5)
+    p.add_argument("--label-horizon", type=int, default=1)
+    p.add_argument("--final-holdout", type=int, default=100)
+    p.add_argument("--out", help="Optional JSON path for split-plan record")
     args = parser.parse_args(argv)
     if args.cmd == "fetch-fred":
         result = fetch_fred_daily(Path(args.out), args.start, args.end)
+    elif args.cmd == "qualify-data":
+        from .data_gate import qualify_dataset
+        result = qualify_dataset(Path(args.file), Path(args.manifest), purpose=args.purpose)
+    elif args.cmd == "walkforward-plan":
+        from .walkforward import plan_walkforward
+        frame = pd.read_csv(args.file, usecols=[args.timestamp_column],
+                            dtype={args.timestamp_column:"string"})
+        if not frame[args.timestamp_column].astype(str).str.contains(r"(?:Z|[+-]\d{2}:?\d{2})$",case=False,regex=True).all():
+            parser.error("All input timestamps require an explicit timezone")
+        timestamps = pd.to_datetime(frame[args.timestamp_column], utc=True, errors="raise")
+        result = plan_walkforward(timestamps, min_train=args.min_train,
+                                  test_size=args.test_size, embargo=args.embargo,
+                                  label_horizon=args.label_horizon, final_holdout=args.final_holdout)
+        if args.out:
+            target=Path(args.out);target.parent.mkdir(parents=True,exist_ok=True)
+            target.write_text(json.dumps(result,indent=2),encoding="utf-8")
     elif args.cmd == "import-daily-bi5":
         from .dukascopy_daily import import_daily_bi5_file
         result = import_daily_bi5_file(Path(args.file), Path(args.out),

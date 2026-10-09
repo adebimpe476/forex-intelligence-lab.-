@@ -49,7 +49,7 @@ def _config_check(c: SimulatorConfig) -> None:
 
 
 def _utc_epoch_ns(values: object) -> np.ndarray:
-    """Portable UTC epoch nanoseconds with pandas 2.x and 3.x."""
+    """Portable UTC epoch nanoseconds on pandas 2.x and 3.x."""
     return pd.DatetimeIndex(values).as_unit("ns").asi8
 
 
@@ -75,8 +75,8 @@ def simulate_quotes(raw_ticks: pd.DataFrame, config: SimulatorConfig = Simulator
     pip = 0.0001
     slip = config.slippage_pips_per_side * pip
     quotes = ticks.reset_index(drop=True)
-    # Pandas 3 may store parsed datetimes at microsecond resolution. Explicitly use
-    # nanoseconds to compare with Timestamp.value without skipping future quotes.
+    # Pandas 3 defaults some parsed datetimes to microseconds; explicit ns is vital:
+    # Timestamp.value below is nanoseconds, so mixed units would skip ALL fills.
     timestamps = _utc_epoch_ns(quotes["timestamp_utc"])
     last_exit_ns = -1
     executions = []

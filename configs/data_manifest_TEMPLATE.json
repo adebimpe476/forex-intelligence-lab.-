@@ -1,0 +1,13 @@
+{
+  "sha256": "REPLACE_WITH_VERIFIED_SHA256_OF_YOUR_LOCAL_CSV",
+  "kind": "BID_ASK_TICK",
+  "pair": "EURUSD",
+  "provider": "REPLACE_WITH_ACTUAL_PROVIDER",
+  "source_url": "https://replace-with-real-provider-documentation.example",
+  "rights": {
+    "quant_research": false,
+    "ai_training": false,
+    "evidence_url": "https://replace-with-actual-license-documentation.example"
+  },
+  "rights_review_notes": "Leave permissions false until source owner terms have been independently reviewed."
+}
