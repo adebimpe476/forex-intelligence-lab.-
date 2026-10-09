@@ -68,3 +68,8 @@ See [`docs/TICK_DATA_SPEC.md`](docs/TICK_DATA_SPEC.md) for limitations and accep
 ## GitHub handoff (2026-10-09)
 
 The linked repository is `adebimpe476/forex-intelligence-lab.-` (note the trailing `.-`). It was created **public**. Publishing the research-only code requires no brokerage credentials; change repository visibility to private before adding proprietary experiments or data whose license forbids public redistribution. The development branch is `feature/research-foundation-v0-2`. The branch is for review and should not be merged before CI checks pass.
+
+## Original trading intelligence v0.3 (research-only)
+
+In addition to open-source infrastructure, the project now contains **our own** five-timeframe [regime and signal hypothesis](src/forexlab/intelligence.py), an [after-cost R-multiple expectancy audit](src/forexlab/edge_audit.py), and [nine targeted synthetic regression tests](tests/test_intelligence.py). The [research rationale, limitations, references and validation conditions](docs/ORIGINAL_RESEARCH_INTELLIGENCE.md) are documented. These modules do **not** connect to a broker or claim proven signals. A candidate BUY or SELL is never an executable order.
+
