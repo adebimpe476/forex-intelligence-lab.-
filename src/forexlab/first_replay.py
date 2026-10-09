@@ -77,6 +77,10 @@ def prepare_first_replay(archive: Path, declaration_path: Path, output_dir: Path
     if pair != 'EURUSD':
         raise ValueError('First audited replay is explicitly limited to EURUSD')
     archive, declaration_path, output_dir = map(Path, (archive, declaration_path, output_dir))
+    # Keep licensed quote files outside Git checkouts, including public ones.
+    destination = output_dir.resolve()
+    if any((folder / '.git').exists() for folder in (destination, *destination.parents)):
+        raise ValueError('PRIVATE_OUTPUT_REQUIRED: output must be outside any Git repository')
     source = _safe_declaration(declaration_path, pair)
     if output_dir.exists():
         raise FileExistsError('Refusing to overwrite or mix with existing research outputs')
