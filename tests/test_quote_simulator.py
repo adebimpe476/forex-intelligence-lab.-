@@ -111,3 +111,13 @@ def test_unobserved_gap_never_reclassified_as_profit():
     assert out['rejections'] == [{'signal_time':'2026-01-06T03:45:00+00:00', 'reason':'UNOBSERVED_DATA_GAP'}]
     assert out['invalid_outcomes_present'] is True
     assert out['execution_allowed'] is False
+
+
+def test_epoch_timestamps_explicitly_normalized_from_microseconds():
+    from forexlab.quote_simulator import _utc_epoch_ns
+    t = pd.date_range('2026-01-06T00:00:00Z', periods=2, freq='15min')
+    micros = t.as_unit('us')
+    nano = _utc_epoch_ns(micros)
+    assert nano[0] == pd.Timestamp('2026-01-06T00:00:00Z').value
+    assert nano[1] == pd.Timestamp('2026-01-06T00:15:00Z').value
+    assert nano[1] - nano[0] == 900_000_000_000
