@@ -1,22 +1,29 @@
-"""Current-layout daily Dukascopy BI5 decoder (research only; no orders).
+"""Dukascopy current-layout DAILY BI5 decoder (research-only, no orders).
 
-Daily filename DD_ticks.bi5, 20-byte >IIIff records, timestamp milliseconds
-from 00:00 UTC. Do not mix with legacy hourly HHh_ticks.bi5 files.
-Network acquisition, redistribution rights and broker comparisons are separate.
+Current documented daily layout: SYMBOL/YYYY/(month-1)/DD_ticks.bi5.
+Unlike legacy hourly BI5, the millisecond offset is relative to 00:00 UTC,
+and every decoded offset must be strictly below 86_400_000.
+
+Only accepts caller-supplied local bytes; it never scrapes/downloads a feed.
+Data entitlement / redistribution rights must be verified independently.
 """
 from __future__ import annotations
+
 import hashlib
 import json
 import lzma
 import math
 from pathlib import Path
+
 import pandas as pd
+
 from .dukascopy import RECORD, SCALES
 from .tickdata import validate_ticks
 
 MAX_COMPRESSED_BYTES = 32 * 1024 * 1024
 MAX_TICKS_PER_DAY = 3_000_000
 MILLIS_PER_DAY = 86_400_000
+
 
 def _day_utc(day_utc: object) -> pd.Timestamp:
     try:
@@ -30,15 +37,21 @@ def _day_utc(day_utc: object) -> pd.Timestamp:
         raise ValueError("Daily BI5 reference must be exactly 00:00 UTC")
     return ts
 
+
 def daily_bi5_relative_path(pair: str, day_utc: object) -> str:
-    """Source-relative path; not a verified download URL."""
+    """Provider's current daily-layout path; NOT a verified download URL."""
     if pair not in SCALES:
         raise ValueError("Unreviewed pair scale")
     day = _day_utc(day_utc)
     return f"{pair}/{day.year}/{day.month-1:02d}/{day.day:02d}_ticks.bi5"
 
+
 def decode_daily_bi5(payload: bytes, *, pair: str, day_utc: object) -> pd.DataFrame:
-    """Decode and bound checked quote ticks; layout must be explicitly selected."""
+    """Decode and integrity-check an LZMA BI5 UTC-day payload.
+
+    This decoder MUST NOT be used with legacy hourly BI5 files. Format is
+    explicitly selected rather than guessed from timestamp distributions.
+    """
     if pair not in SCALES:
         raise ValueError("Unsupported FX pair scale")
     day = _day_utc(day_utc)
@@ -53,6 +66,7 @@ def decode_daily_bi5(payload: bytes, *, pair: str, day_utc: object) -> pd.DataFr
         raise ValueError("Invalid LZMA daily BI5 stream") from exc
     if not raw or len(raw) % RECORD.size or len(raw) > MAX_TICKS_PER_DAY * RECORD.size:
         raise ValueError("Invalid daily BI5 record length or count")
+
     times, bids, asks = [], [], []
     previous = -1
     for ms, ask, bid, ask_vol, bid_vol in RECORD.iter_unpack(raw):
@@ -70,9 +84,10 @@ def decode_daily_bi5(payload: bytes, *, pair: str, day_utc: object) -> pd.DataFr
     cleaned, _ = validate_ticks(df.assign(timestamp_utc=df.timestamp_utc.dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")))
     return cleaned[["timestamp_utc", "bid", "ask"]]
 
+
 def import_daily_bi5_file(source: Path, out_dir: Path, *, pair: str,
                           day_utc: object, license_note: str) -> dict:
-    """Import one locally held, rights-checked file with SHA256 provenance."""
+    """Convert one local file, writing an auditable manifest, no networking."""
     if not license_note or not license_note.strip():
         raise ValueError("Document provider data-use rights before importing")
     source = Path(source)
@@ -93,6 +108,6 @@ def import_daily_bi5_file(source: Path, out_dir: Path, *, pair: str,
                 "last_timestamp": ticks.timestamp_utc.max().isoformat(),
                 "csv_file": csv_path.name, "data_rights_review": license_note,
                 "execution_ready": False, "lean_backtest_verified": False,
-                "warning": "Local import only. Not verified with live source, LEAN, MT5, or broker fills."}
+                "warning": "Local import only. Not verified with a live provider, LEAN engine, MT5, or broker fills."}
     (out_dir / f"{stem}.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest

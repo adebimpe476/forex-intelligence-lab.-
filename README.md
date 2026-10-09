@@ -1,4 +1,4 @@
-# Forex Intelligence Lab · Research foundation v0.2
+# Forex Intelligence Lab · Research control v0.7
 
 **Status: RESEARCH ONLY. No live quotes, no AI prediction model, no MT5 account, no actual LEAN integration, and no capability to place trades.**
 
@@ -85,3 +85,7 @@ Official Dukascopy documentation distinguishes daily files (`DD_ticks.bi5`, mill
 ## V0.6: original portfolio risk checks and session-clock QA (research-only)
 
 Added [illustrative USD-account risk gate](src/forexlab/risk.py) and [DST-aware New York 17:00 session aggregation](src/forexlab/fx_sessions.py), with CLI tools `forexlab research-size` and `forexlab session-bars`. All output stays **non-executable**, and sample inputs are not live trading signals. The risk gate includes duplicate detection, stop budget/round-down, realized+unrealized daily drawdown, open-risk cap and overlapping USD directional positions. See [limitations and checks](docs/RISK_AND_SESSIONS_V0_6.md). Market-session bars are not yet compatible with the fixed-duration existing strategy signal engine across DST; this is deliberately not wired into live execution or backtesting.
+
+## V0.7: Mobile research control + experiment laboratory
+
+Now includes a redesigned responsive **read-only** research console with Overview / Experiment Lab / Pipeline sections. The experiment journal stores CSV source hashes, fixed strategy/cost inputs, and hashed previous-record links, and refuses duplicate or corrupted research runs. **These runs are NOT LEAN simulations or validated broker-tradable strategy results.** Three example commands and limitations are documented in [docs/EXPERIMENT_LAB_V0_7.md](docs/EXPERIMENT_LAB_V0_7.md). A deterministic **synthetic** fixture generator is included for local QA. No account, orders, live quotes or artificial win-rate promises are present.

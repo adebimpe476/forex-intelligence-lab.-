@@ -18,3 +18,6 @@ data/raw/approved/
 data/raw/dukascopy/
 data/processed/
 !data/raw/fred_h10_daily_snapshot_2026-10-08.csv
+
+# Never commit local experiment logs, trial results, license-restricted datasets
+artifacts/

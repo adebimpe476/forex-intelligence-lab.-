@@ -25,7 +25,7 @@
 - No actual LEAN installed or integrated; no benchmark against other engines.
 - No MT5 connected, no broker account, no VPS, no signed-off execution authorization.
 - No machine-learning training on a full dataset, no independent out-of-sample profitability verification, no genuine trading signals.
-- The user created GitHub repository `adebimpe476/forex-intelligence-lab.-` on 2026-10-09, currently PUBLIC and initially empty. A review branch is being prepared; repository visibility can be changed by the user. Do not store brokerage secrets, proprietary or restricted datasets in Git history.
+- No GitHub repository created; connected GitHub tooling exposes other projects but does not offer a new-repository creation action. The ZIP is ready to put in a **new private repository** without touching unrelated projects.
 
 ## Sources
 - Federal Reserve H.10/FRED: https://fred.stlouisfed.org/series/DEXUSEU, https://fred.stlouisfed.org/series/DEXJPUS, https://fred.stlouisfed.org/series/DEXUSUK

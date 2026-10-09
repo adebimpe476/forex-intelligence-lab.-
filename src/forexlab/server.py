@@ -1,13 +1,14 @@
 """Read-only research dashboard. No broker credentials or order routes."""
 from pathlib import Path
 import csv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from .research_lab import public_experiments
 
 ROOT = Path(__file__).resolve().parents[2]
 HISTORY = ROOT / 'data/raw/fred_h10_daily_snapshot_2026-10-08.csv'
 WEB = ROOT / 'web/index.html'
-app = FastAPI(title='Forex Intelligence Lab — Research Only', version='0.1.0')
+app = FastAPI(title='Forex Intelligence Lab — Research Only', version='0.7.0')
 
 
 @app.get('/')
@@ -47,3 +48,12 @@ def history():
             "as_of":"2026-10-08", "is_live":False,
             "series":[{"date":r['date'],**{p:(float(r[p]) if r[p] else None)
                     for p in ('EURUSD','USDJPY','GBPUSD')}} for r in rows]}
+
+
+@app.get('/api/experiments')
+def experiments():
+    try:
+        return public_experiments(ROOT / 'artifacts/experiments/ledger.jsonl')
+    except ValueError as exc:
+        # Do not display unverified / corrupted research as valid results.
+        raise HTTPException(status_code=503, detail='Experiment ledger failed integrity review') from exc

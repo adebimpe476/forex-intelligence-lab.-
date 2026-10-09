@@ -43,3 +43,12 @@
 - [x] Add automated tests for crossed/invalid quotes, ordering, no future leakage, no fake missing candles and file output.
 - [ ] Obtain and audit authentic licensed tick data for all three pairs; nothing in V0.2 asserts this data has been collected.
 - [ ] Implement configurable FX market-session boundaries / NY 17:00 daily rolls and compare results with broker charts.
+
+## V0.7 (2026-10-09) — Mobile control prototype and experiment journal
+- [x] Responsive Overview / Experiment Lab / Pipeline tabs with explicit research-only labels and read-only APIs.
+- [x] Append-only SHA-256 linked diagnostic logs, duplicate detection, fail-closed integrity checking, input source hashes.
+- [x] Synthetic fixture generator and documented reproducible CLI workflow.
+- [x] No order actions, no live market prices, no manufactured profitability statistics.
+- [ ] Authenticate and authorize all endpoints before public deployment.
+- [ ] Convert from *indicative daily diagnostics* to proven execution-aware LEAN backtests with real licensed bid/ask history.
+- [ ] Implement true blind holdout / walk-forward experiment promotion and source permissions.

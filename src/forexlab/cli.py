@@ -61,6 +61,17 @@ def main(argv=None):
     p.add_argument("file", help="CSV with timezone-aware timestamp_utc,bid,ask")
     p.add_argument("--timeframe", choices=["D1", "H4"], default="D1")
     p.add_argument("--out", default="data/processed/ny-session")
+    p = sub.add_parser('experiment-run', help='Append a hashed RESEARCH diagnostic from synthetic/FRED daily CSV; NOT LEAN')
+    p.add_argument('file', help='CSV with date and pair columns; not live market candles')
+    p.add_argument('--pair', choices=list(SERIES), required=True)
+    p.add_argument('--strategy', choices=list(STRATEGIES), required=True)
+    p.add_argument('--source-kind', choices=['SYNTHETIC_TEST', 'FRED_H10_DAILY_INDICATIVE'], required=True)
+    p.add_argument('--cost-bps', type=float, default=2.0)
+    p.add_argument('--ledger', default='artifacts/experiments/ledger.jsonl')
+    p.add_argument('--acknowledge-nontradable', action='store_true', required=True,
+                   help='Confirm this is an illustrative diagnostic, not a real broker backtest')
+    p = sub.add_parser('experiment-audit', help='Verify hash-chain integrity of local research diagnostic ledger')
+    p.add_argument('--ledger', default='artifacts/experiments/ledger.jsonl')
     args = parser.parse_args(argv)
     if args.cmd == "fetch-fred":
         result = fetch_fred_daily(Path(args.out), args.start, args.end)
@@ -109,6 +120,15 @@ def main(argv=None):
                   "observed_bars": len(bars), "quality": quality,
                   "session_convention": "NY 17:00; verify vs broker; variable H4 UTC duration at DST",
                   "research_only": True, "execution_allowed": False}
+    elif args.cmd == 'experiment-run':
+        from .research_lab import run_diagnostic_experiment
+        result = run_diagnostic_experiment(
+            data_path=Path(args.file), ledger_path=Path(args.ledger),
+            pair=args.pair, strategy=args.strategy, source_kind=args.source_kind,
+            cost_bps=args.cost_bps, acknowledge_nontradable=args.acknowledge_nontradable)
+    elif args.cmd == 'experiment-audit':
+        from .research_lab import public_experiments
+        result = public_experiments(Path(args.ledger))
     elif args.cmd == "audit":
         result = audit_indicative_csv(Path(args.file))
     else:
