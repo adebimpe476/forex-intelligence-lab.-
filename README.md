@@ -77,3 +77,7 @@ In addition to open-source infrastructure, the project now contains **our own** 
 ## v0.4 — Real quote data format pipeline (provider data not yet acquired)
 
 An original bounded parser for Dukascopy hourly BI5 bid/ask quote files and a deterministic native LEAN Forex quote-tick ZIP exporter are now implemented and regression tested. They work on **locally supplied, rights-reviewed files**, not by automatically harvesting the provider feed. No genuine source file was downloaded in this environment, and no actual LEAN backtest was run. See [data acquisition acceptance and exact commands](docs/DATA_ACQUISITION_V0_4.md). Data files and generated ZIPs are excluded from Git.
+
+## V0.5: Daily Dukascopy tick data format (research-only)
+
+The official provider reference describes a current daily BI5 layout with timestamps anchored at **00:00 UTC**, different from our v0.4 legacy hourly layout. Added [an explicit daily importer](src/forexlab/dukascopy_daily.py), [synthetic tests](tests/test_dukascopy_daily.py) and [rights-controlled import instructions](docs/DAILY_BI5_IMPORT_V0_5.md). Run `forexlab import-daily-bi5 --help` for the new CLI. **No real daily BI5 source file has been acquired or verified, no LEAN backtest has run, and no broker order may execute.**
