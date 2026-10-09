@@ -1,9 +1,0 @@
-id,name,category,url,purpose,license_or_usage,decision,status
-S01,FRED DEXUSEU,historical daily,https://fred.stlouisfed.org/series/DEXUSEU,EURUSD daily H10 reference,Attribution and rights review for reuse,RETAIN,Dated 1999-2026 verified; full-series queried; short sample archived
-S02,FRED DEXJPUS,historical daily,https://fred.stlouisfed.org/series/DEXJPUS,USDJPY daily H10 reference,Attribution and rights review for reuse,RETAIN,Dated 1999-2026 verified; full-series queried; short sample archived
-S03,FRED DEXUSUK,historical daily,https://fred.stlouisfed.org/series/DEXUSUK,GBPUSD daily H10 reference,Attribution and rights review for reuse,RETAIN,Dated 1999-2026 verified; full-series queried; short sample archived
-S04,Dukascopy historical data,intraday tick,https://www.dukascopy.com/swiss/english/marketwatch/historical/,Tick/bid ask data candidate,Licensing redistribution and broker representativeness must be checked,INVESTIGATE,Not collected or quality-checked
-S05,HistData,forex tick and minute,https://www.histdata.com/download-free-forex-data/,Independent OHLC/tick candidate,Terms and quote quality review required,INVESTIGATE,Not collected or quality-checked
-S06,MT5 approved broker terminal,historical and live,https://www.mql5.com/en/docs/python_metatrader5,Live bid/ask quote and demo execution adapter,Broker agreement and platform permissions govern access,INVESTIGATE,No broker connected
-S07,FRED macroeconomic series,macro historical,https://fred.stlouisfed.org/,Interest rates and vintage-aware macro research,Series-specific citation and permitted usage,INVESTIGATE,Not ingested
-S08,ALFRED economic revisions,macro vintage,https://fred.stlouisfed.org/docs/api/fred/alfred.html,Point-in-time economic release validation,Series-specific citation and licensing,INVESTIGATE,Not ingested

@@ -93,14 +93,21 @@ def main(argv=None):
     p.add_argument("--label-horizon", type=int, default=1)
     p.add_argument("--final-holdout", type=int, default=100)
     p.add_argument("--out", help="Optional JSON path for split-plan record")
-    p = sub.add_parser("import-histdata", help="Import licensed local HistData bid/ask tick ZIP; no download")
-    p.add_argument("file", help="Local ZIP containing DAT_ASCII_PAIR_T_YYYYMM.csv")
+    p = sub.add_parser("import-histdata", help="Import locally obtained HistData bid/ask tick ZIP; no download")
+    p.add_argument("file", help="Local DAT_ASCII_PAIR_T_YYYYMM.csv inside a ZIP")
     p.add_argument("--pair", choices=["EURUSD", "GBPUSD", "USDJPY"], required=True)
     p.add_argument("--out", default="data/processed/private-histdata")
-    p = sub.add_parser("lean-preflight", help="Inspect LEAN prerequisites without running engine")
+    p = sub.add_parser("lean-preflight", help="Inspect LEAN prerequisites; does not execute an engine")
     p.add_argument("--data-manifest", default=None)
+    p = sub.add_parser("first-replay", help="Stage a rights-declared EURUSD HistData research sample; no orders or LEAN run")
+    p.add_argument("archive", help="Local historical EURUSD HistData generic-ASCII ZIP")
+    p.add_argument("--declaration", required=True, help="Private JSON with provider/pair/source_url and rights.quant_research/evidence_url")
+    p.add_argument("--out", required=True, help="A NEW directory outside public Git for private sample/staging/results")
     args = parser.parse_args(argv)
-    if args.cmd == "import-histdata":
+    if args.cmd == "first-replay":
+        from .first_replay import prepare_first_replay
+        result = prepare_first_replay(Path(args.archive), Path(args.declaration), Path(args.out))
+    elif args.cmd == "import-histdata":
         from .histdata import import_histdata_tick_zip
         result = import_histdata_tick_zip(Path(args.file), Path(args.out), pair=args.pair)
     elif args.cmd == "lean-preflight":

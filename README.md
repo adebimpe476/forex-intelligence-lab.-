@@ -106,6 +106,10 @@ The actual input is independently checked by `forexlab.tickdata.validate_ticks`;
 ## v0.9 — Research dataset qualification and walk-forward validation plans
 The original [data qualification gate](src/forexlab/data_gate.py) verifies input hashes, format, timestamp integrity and purpose-specific declared rights **without falsely certifying a license**. The [walk-forward planner](src/forexlab/walkforward.py) prepares expanding training/test segments with embargo and a reserved final holdout. Both are research-only. Examples and remaining blockers: [docs/DATA_QUALIFICATION_WALKFORWARD_V0_9.md](docs/DATA_QUALIFICATION_WALKFORWARD_V0_9.md).
 
-## v1.0 — Honest historical bid/ask data intake + LEAN preflight
+## V1.0 — Historical tick ZIP intake + LEAN build preflight
 
-Added a [local HistData vendor tick ZIP importer](src/forexlab/histdata.py) handling fixed EST UTC−05 without DST, plus a [LEAN prerequisites/evidence checker](src/forexlab/lean_preflight.py). The importer emits hash-verified normalized quotes and refuses corrupt inputs; neither data source rights nor LEAN execution can be automatically claimed. Run `forexlab import-histdata --help`, `forexlab lean-preflight`. See [documented sources, restrictions and runbook](docs/REAL_DATA_AND_LEAN_V1_0.md). **Only synthetic fixtures have been exercised. Live execution remains disabled.**
+Added an original [HistData generic ASCII bid/ask tick ZIP reader](src/forexlab/histdata.py) with fixed **EST/UTC−05 (no DST)** conversion and strict archive/date/quote guards; it never fetches, distributes or approves source data rights. Added a [LEAN prerequisite probe](src/forexlab/lean_preflight.py) that always reports whether actual engine execution has *not* occurred. Use `forexlab import-histdata --help` and `forexlab lean-preflight --help`. See [data-provider permissions, exact instructions and evidence requirements](docs/REAL_DATA_AND_LEAN_V1_0.md). **All vendor-format fixtures are synthetic.**
+
+## v1.1: One-command private EUR/USD first-replay preparation
+
+Added [`forexlab first-replay`](docs/FIRST_EURUSD_REPLAY_V1_1.md): given a **locally obtained** HistData EURUSD tick ZIP and an explicit private rights declaration, this stages timestamp-normalized bid/ask quotes, technical quality checks, a **reference simulator** report, LEAN-format ZIPs and linked integrity/provenance manifests. Nothing is downloaded, published, traded or described as an actual LEAN backtest. Real provider quote data and independent license verification are still pending.
