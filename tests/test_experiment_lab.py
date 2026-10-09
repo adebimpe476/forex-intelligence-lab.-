@@ -3,7 +3,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-from fastapi.testclient import TestClient
+import asyncio
+import httpx
 from forexlab.research_lab import append_ledger, read_ledger, run_diagnostic_experiment, public_experiments
 from forexlab.server import app
 
@@ -79,16 +80,25 @@ def test_no_nonfinite_cost_allowed(tmp_path):
               cost_bps=bad,acknowledge_nontradable=True)
 
 
+def asgi_request(app, method, path, **kwargs):
+    # Use HTTPX's direct ASGI transport, independent of the evolving
+    # Starlette TestClient/httpx2 compatibility across FastAPI releases.
+    async def execute():
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),
+                                    base_url="http://testserver") as client:
+            return await client.request(method, path, **kwargs)
+    return asyncio.run(execute())
+
+
 def test_no_live_order_endpoints_and_read_only_api():
-    c=TestClient(app)
-    h=c.get('/api/health');assert h.status_code==200
+    h=asgi_request(app, "GET", "/api/health");assert h.status_code==200
     assert h.json()['order_execution_enabled'] is False
-    x=c.get('/api/experiments');assert x.status_code==200
+    x=asgi_request(app, "GET", "/api/experiments");assert x.status_code==200
     assert x.json()['execution_allowed'] is False
     assert x.json()['validated_strategies']==0
-    assert c.post('/api/orders',json={'side':'BUY'}).status_code==404
-    assert c.post('/api/experiments',json={}).status_code==405
-    html=c.get('/');assert html.status_code==200
+    assert asgi_request(app, 'POST', '/api/orders', json={'side':'BUY'}).status_code==404
+    assert asgi_request(app, 'POST', '/api/experiments', json={}).status_code==405
+    html=asgi_request(app, 'GET', '/');assert html.status_code==200
     assert 'Experiment Lab' in html.text and 'HARD DISABLED' in html.text
 
 
@@ -98,7 +108,7 @@ def test_ledger_integrity_endpoint_returns_503(tmp_path,monkeypatch):
     p=csv_fixture(tmp_path);ledger=root/'artifacts/experiments/ledger.jsonl';run(p,ledger)
     ledger.write_text(ledger.read_text().replace('trend_following','breakout'))
     monkeypatch.setattr(sv,'ROOT',root)
-    res=TestClient(sv.app).get('/api/experiments')
+    res=asgi_request(sv.app, 'GET', '/api/experiments')
     assert res.status_code==503
     assert 'integrity review' in res.json()['detail']
 
