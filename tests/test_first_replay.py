@@ -72,3 +72,12 @@ def test_zip_pair_does_not_match_requested_pair(tmp_path):
     archive, rights=fixture(tmp_path,count=100,pair='GBPUSD')
     with pytest.raises(ValueError, match='pair'):
         prepare_first_replay(archive,rights,tmp_path/'bad')
+
+
+def test_refuses_output_inside_any_git_checkout(tmp_path):
+    archive, rights = fixture(tmp_path)
+    project = tmp_path / 'public_project'
+    (project / '.git').mkdir(parents=True)
+    with pytest.raises(ValueError, match='PRIVATE_OUTPUT_REQUIRED'):
+        prepare_first_replay(archive, rights, project / 'data' / 'private_quotes')
+    assert not (project / 'data').exists()
