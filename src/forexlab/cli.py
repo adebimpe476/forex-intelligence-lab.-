@@ -23,6 +23,12 @@ def main(argv=None):
     p.add_argument("--pair", choices=list(SERIES), default="EURUSD")
     p.add_argument("--strategy", choices=list(STRATEGIES), default="trend_following")
     p.add_argument("--cost-bps", type=float, default=2.)
+    p = sub.add_parser("import-daily-bi5", help="Decode a rights-cleared local daily BI5 file; no network or orders")
+    p.add_argument("file", help="Local DD_ticks.bi5 path")
+    p.add_argument("--pair", choices=list(SERIES), required=True)
+    p.add_argument("--day-utc", required=True, help="Exact UTC midnight e.g. 2024-01-02T00:00:00Z")
+    p.add_argument("--rights-note", required=True, help="Provider rights review and permitted research use")
+    p.add_argument("--out", default="data/processed/dukascopy-daily")
     p = sub.add_parser("resample-ticks", help="Validate real bid/ask tick CSV and produce observed UTC bars; never trade")
     p.add_argument("file", help="CSV columns timestamp_utc,bid,ask with timezone-aware timestamps")
     p.add_argument("--out", default="data/processed/tick-bars")
@@ -41,6 +47,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.cmd == "fetch-fred":
         result = fetch_fred_daily(Path(args.out), args.start, args.end)
+    elif args.cmd == "import-daily-bi5":
+        from .dukascopy_daily import import_daily_bi5_file
+        result = import_daily_bi5_file(Path(args.file), Path(args.out),
+                                       pair=args.pair, day_utc=args.day_utc, license_note=args.rights_note)
     elif args.cmd == "resample-ticks":
         from .tickdata import resample_tick_csv
         result = resample_tick_csv(Path(args.file), Path(args.out), args.timeframes)
