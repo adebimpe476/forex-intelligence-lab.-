@@ -72,6 +72,14 @@ def main(argv=None):
                    help='Confirm this is an illustrative diagnostic, not a real broker backtest')
     p = sub.add_parser('experiment-audit', help='Verify hash-chain integrity of local research diagnostic ledger')
     p.add_argument('--ledger', default='artifacts/experiments/ledger.jsonl')
+    p = sub.add_parser("simulate-quotes", help="Dry-run 1-lot bid/ask M15 EMA crossover reference model; NEVER places orders")
+    p.add_argument("file", help="Pre-approved tick CSV: timestamp_utc,bid,ask; not FRED fixings")
+    p.add_argument("--pair", choices=["EURUSD", "GBPUSD"], required=True)
+    p.add_argument("--fast", type=int, default=5)
+    p.add_argument("--slow", type=int, default=12)
+    p.add_argument("--stop-pips", type=float, default=12.0)
+    p.add_argument("--take-pips", type=float, default=18.0)
+    p.add_argument("--out", help="Optional JSON report file; do not commit licensed quotes")
     args = parser.parse_args(argv)
     if args.cmd == "fetch-fred":
         result = fetch_fred_daily(Path(args.out), args.start, args.end)
@@ -91,6 +99,15 @@ def main(argv=None):
         df = pd.read_csv(args.file, dtype={"timestamp_utc": "string"})
         result = to_lean_forex_tick_zips(df, pair=args.pair,
                                           market=args.market, out_dir=Path(args.out))
+    elif args.cmd == "simulate-quotes":
+        from .quote_simulator import simulate_quotes, SimulatorConfig
+        data = pd.read_csv(Path(args.file), dtype={"timestamp_utc":"string"})
+        result = simulate_quotes(data, SimulatorConfig(pair=args.pair, fast=args.fast, slow=args.slow,
+                                        stop_pips=args.stop_pips, take_pips=args.take_pips))
+        if args.out:
+            target = Path(args.out)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(json.dumps(result, indent=2), encoding="utf-8")
     elif args.cmd == "research-size":
         from .risk import assess_risk
         positions = []
