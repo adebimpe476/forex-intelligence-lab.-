@@ -93,8 +93,20 @@ def main(argv=None):
     p.add_argument("--label-horizon", type=int, default=1)
     p.add_argument("--final-holdout", type=int, default=100)
     p.add_argument("--out", help="Optional JSON path for split-plan record")
+    p = sub.add_parser("import-histdata", help="Import licensed local HistData bid/ask tick ZIP; no download")
+    p.add_argument("file", help="Local ZIP containing DAT_ASCII_PAIR_T_YYYYMM.csv")
+    p.add_argument("--pair", choices=["EURUSD", "GBPUSD", "USDJPY"], required=True)
+    p.add_argument("--out", default="data/processed/private-histdata")
+    p = sub.add_parser("lean-preflight", help="Inspect LEAN prerequisites without running engine")
+    p.add_argument("--data-manifest", default=None)
     args = parser.parse_args(argv)
-    if args.cmd == "fetch-fred":
+    if args.cmd == "import-histdata":
+        from .histdata import import_histdata_tick_zip
+        result = import_histdata_tick_zip(Path(args.file), Path(args.out), pair=args.pair)
+    elif args.cmd == "lean-preflight":
+        from .lean_preflight import inspect_lean_environment
+        result = inspect_lean_environment(data_manifest=args.data_manifest)
+    elif args.cmd == "fetch-fred":
         result = fetch_fred_daily(Path(args.out), args.start, args.end)
     elif args.cmd == "qualify-data":
         from .data_gate import qualify_dataset
