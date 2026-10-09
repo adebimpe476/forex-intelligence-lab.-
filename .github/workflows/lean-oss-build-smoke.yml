@@ -1,0 +1,41 @@
+name: LEAN OSS build smoke (no data or orders)
+on:
+  push:
+    branches:
+      - feature/research-foundation-v0-2
+    paths:
+      - .github/workflows/lean-oss-build-smoke.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-upstream-lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout research laboratory
+        uses: actions/checkout@v4
+      - name: Install pinned .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Checkout pinned upstream open-source LEAN engine
+        uses: actions/checkout@v4
+        with:
+          repository: QuantConnect/Lean
+          ref: 80e7843f645673bcbeaab963049f76f20f6785e1
+          path: lean-engine-source
+          persist-credentials: false
+      - name: Record engine source revision
+        shell: bash
+        run: |
+          echo "LEAN_SHA=$(git -C lean-engine-source rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          echo "DOTNET_VERSION=$(dotnet --version)" >> "$GITHUB_STEP_SUMMARY"
+          echo "This smoke attempts to compile upstream LEAN only." >> "$GITHUB_STEP_SUMMARY"
+          echo "NO algorithm run, historical data, profit claims or broker orders." >> "$GITHUB_STEP_SUMMARY"
+      - name: Compile open-source LEAN solution
+        working-directory: lean-engine-source
+        run: dotnet build QuantConnect.Lean.sln --configuration Release --nologo
+      - name: Document scope of result
+        if: success()
+        run: echo "LEAN code compiled from the recorded upstream commit. Real quote ingestion/backtesting NOT yet attempted." >> "$GITHUB_STEP_SUMMARY"
