@@ -86,7 +86,7 @@ def analyze_pair(pair: str, bars: Mapping[str, pd.DataFrame], asof_utc: object,
     """Produce BUY / SELL / WAIT **research candidates**, never executable orders.
 
     Parameters were selected as *unverified hypotheses*, not optimized values.
-
+    
     The H4 price-path efficiency ratio selects a trend/range regime.
     Trend: D1/H1/M30 direction plus M15 breakout must agree with H4 direction.
     Range: H1 z-score extreme plus opposing M15 close change proposes reversion.

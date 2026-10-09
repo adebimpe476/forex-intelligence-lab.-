@@ -1,18 +1,18 @@
 # Original research intelligence v0.3 — hypotheses, not signals
 
-**Source: original implementation by this project's research assistant, informed by academic quantitative research.** These models are uncalibrated; no profit or predictive-power claim is made. Trading and account execution remain disabled at this stage.
+**Source: original implementation by this project's research assistant, informed by academic quantitative research.** These models are uncalibrated; no profit or predictive-power claim is made. Trading and account execution remain permanently disabled at this stage.
 
 ## Why this code exists
 
-Collecting EAs is not a systematic trading edge. We require a reproducible *selection policy* that observes market conditions, evaluates candidate strategies and can refuse trades. The proprietary research module (`src/forexlab/intelligence.py`) uses all five requested timeframes:
+Collecting EAs is not a systematic trading edge. We require a reproducible *selection policy* that observes market conditions, evaluates candidate strategies and can refuse trades. The first proprietary module (`src/forexlab/intelligence.py`) uses precisely all five requested timeframes:
 
 - **D1:** broad trailing return direction, observed from a closed daily bar only.
-- **H4:** price-path efficiency (absolute net price movement divided by absolute price-path length) to select trend, range or uncertain regimes. Thresholds 0.38/0.20 are research assumptions, NOT optimized or accepted strategy parameters.
+- **H4:** Kaufman-style path efficiency (absolute net price movement divided by absolute price-path length) to select trend, range or uncertain regimes. Thresholds 0.38/0.20 are research assumptions, NOT optimized or accepted strategy parameters.
 - **H1:** eight-bar direction for trend alignment; 20-bar z-score for *candidate* mean reversion in ranges.
 - **M30:** six-bar direction confirmation.
 - **M15:** breakout beyond 20 *previous* closes for trend candidate, or one-bar reversal as a potential range entry filter.
 
-The selector refuses to issue a BUY/SELL candidate when data is missing, bar times are naive, data is stale, bar duration differs from the specified timeframe, bid/ask is malformed, the recent historical spread proxy is too large, or timeframes conflict. Outputs are explicitly `research_only=True`, `execution_allowed=False` regardless of result. A BUY/SELL candidate is NOT a validated trade or an order.
+The selector refuses to issue a BUY/SELL candidate when data is missing, bar times are naive, data is stale, bar duration differs from the specified timeframe, bid/ask is malformed, recent spread proxy is too large, or timeframes conflict. Outputs are explicitly `research_only=True`, `execution_allowed=False` regardless of result. A BUY/SELL candidate is NOT a validated trade or an order.
 
 ## 95% win-rate trap
 

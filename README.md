@@ -73,3 +73,7 @@ The linked repository is `adebimpe476/forex-intelligence-lab.-` (note the traili
 
 In addition to open-source infrastructure, the project now contains **our own** five-timeframe [regime and signal hypothesis](src/forexlab/intelligence.py), an [after-cost R-multiple expectancy audit](src/forexlab/edge_audit.py), and [nine targeted synthetic regression tests](tests/test_intelligence.py). The [research rationale, limitations, references and validation conditions](docs/ORIGINAL_RESEARCH_INTELLIGENCE.md) are documented. These modules do **not** connect to a broker or claim proven signals. A candidate BUY or SELL is never an executable order.
 
+
+## v0.4 — Real quote data format pipeline (provider data not yet acquired)
+
+An original bounded parser for Dukascopy hourly BI5 bid/ask quote files and a deterministic native LEAN Forex quote-tick ZIP exporter are now implemented and regression tested. They work on **locally supplied, rights-reviewed files**, not by automatically harvesting the provider feed. No genuine source file was downloaded in this environment, and no actual LEAN backtest was run. See [data acquisition acceptance and exact commands](docs/DATA_ACQUISITION_V0_4.md). Data files and generated ZIPs are excluded from Git.

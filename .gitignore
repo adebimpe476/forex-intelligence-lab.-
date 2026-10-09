@@ -12,3 +12,9 @@ __pycache__/
 data/raw/fred-full/
 data/processed/*.parquet
 data/processed/*.csv
+# Licensed quotes, provider archives and generated staging data remain outside Git history.
+*.bi5
+data/raw/approved/
+data/raw/dukascopy/
+data/processed/
+!data/raw/fred_h10_daily_snapshot_2026-10-08.csv
