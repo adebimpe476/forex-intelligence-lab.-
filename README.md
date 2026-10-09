@@ -89,3 +89,15 @@ Added [illustrative USD-account risk gate](src/forexlab/risk.py) and [DST-aware 
 ## V0.7: Mobile research control + experiment laboratory
 
 Now includes a redesigned responsive **read-only** research console with Overview / Experiment Lab / Pipeline sections. The experiment journal stores CSV source hashes, fixed strategy/cost inputs, and hashed previous-record links, and refuses duplicate or corrupted research runs. **These runs are NOT LEAN simulations or validated broker-tradable strategy results.** Three example commands and limitations are documented in [docs/EXPERIMENT_LAB_V0_7.md](docs/EXPERIMENT_LAB_V0_7.md). A deterministic **synthetic** fixture generator is included for local QA. No account, orders, live quotes or artificial win-rate promises are present.
+
+## V0.8: Quote-side reference simulator (synthetic tests only)
+
+Added [M15 EMA cross bid/ask reference simulator](src/forexlab/quote_simulator.py) with completed-bar signals, observed quote-side fills, modeled adverse slippage, commission and no-hindsight stop/target checks. It is an independent **research diagnostic**, NOT the LEAN engine, market-data license, broker backtest, account, live signal or executable strategy.
+
+See [docs/QUOTE_SIMULATOR_V0_8.md](docs/QUOTE_SIMULATOR_V0_8.md). A new CLI command accepts only a real or synthetic tick CSV with timestamp_utc,bid,ask and an explicit timezone:
+
+```bash
+forexlab simulate-quotes /path/to/rights-reviewed/EURUSD_ticks.csv --pair EURUSD --out artifacts/reference/EURUSD.json
+```
+
+The actual input is independently checked by `forexlab.tickdata.validate_ticks`; FRED H.10 daily rates MUST NOT be passed to this CLI. Outputs always include `source_verified=false`, `strategy_validated=false` and `execution_allowed=false`. All published tests currently use synthetic quote fixtures.
