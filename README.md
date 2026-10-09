@@ -105,3 +105,7 @@ The actual input is independently checked by `forexlab.tickdata.validate_ticks`;
 
 ## v0.9 — Research dataset qualification and walk-forward validation plans
 The original [data qualification gate](src/forexlab/data_gate.py) verifies input hashes, format, timestamp integrity and purpose-specific declared rights **without falsely certifying a license**. The [walk-forward planner](src/forexlab/walkforward.py) prepares expanding training/test segments with embargo and a reserved final holdout. Both are research-only. Examples and remaining blockers: [docs/DATA_QUALIFICATION_WALKFORWARD_V0_9.md](docs/DATA_QUALIFICATION_WALKFORWARD_V0_9.md).
+
+## v1.0 — Honest historical bid/ask data intake + LEAN preflight
+
+Added a [local HistData vendor tick ZIP importer](src/forexlab/histdata.py) handling fixed EST UTC−05 without DST, plus a [LEAN prerequisites/evidence checker](src/forexlab/lean_preflight.py). The importer emits hash-verified normalized quotes and refuses corrupt inputs; neither data source rights nor LEAN execution can be automatically claimed. Run `forexlab import-histdata --help`, `forexlab lean-preflight`. See [documented sources, restrictions and runbook](docs/REAL_DATA_AND_LEAN_V1_0.md). **Only synthetic fixtures have been exercised. Live execution remains disabled.**
