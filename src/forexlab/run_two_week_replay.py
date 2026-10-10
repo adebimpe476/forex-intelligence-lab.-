@@ -79,8 +79,8 @@ def main() -> None:
                           commission_usd_per_lot_roundtrip=args.commission_usd_per_lot)
     verify_manifest(args.manifest, digest, config)
     base = simulate(data, config)
-    if not base["window_has_at_least_eight_utc_dates"]:
-        raise ValueError("INSUFFICIENT_TWO_WEEK_COVERAGE: need >=8 observed UTC dates")
+    if not base["window_has_at_least_eight_well_covered_weekdays"]:
+        raise ValueError("INSUFFICIENT_TWO_WEEK_COVERAGE: need >=8 weekdays with >=100 M5 bars each")
     results = {"candle_only": base}
     source = {"broker_file_sha256": digest,
               "broker_manifest_sha256": sha256(args.manifest.read_bytes()).hexdigest(),
