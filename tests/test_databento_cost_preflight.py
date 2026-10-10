@@ -1,7 +1,14 @@
 """Cost preflight only: no network and no paid API in tests."""
+import importlib.util
+from pathlib import Path
 import pytest
 
-from scripts.check_databento_historical_cost import estimate_costs
+_SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "check_databento_historical_cost.py"
+_SPEC = importlib.util.spec_from_file_location("databento_cost_preflight", _SCRIPT)
+assert _SPEC is not None and _SPEC.loader is not None
+_MODULE = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(_MODULE)
+estimate_costs = _MODULE.estimate_costs
 
 
 class FakeMetadata:
