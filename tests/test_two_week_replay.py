@@ -100,7 +100,7 @@ def test_pnl_shrinks_with_higher_adverse_slippage():
 
 def test_replay_never_counts_trades_after_test_end():
     prefix = sample()
-    end = config(end_utc=27 * 300)
+    end = replace(config(), end_utc=27 * 300)
     later = [m5(27, 102.7, 107.0, 100.0, 105)]
     assert simulate(prefix + later, end)["trades_closed"] == 0
     assert simulate(prefix + later, end)["net_realized_pnl_usd"] == 0
