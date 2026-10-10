@@ -104,3 +104,13 @@ def test_replay_never_counts_trades_after_test_end():
     later = [m5(27, 102.7, 107.0, 100.0, 105)]
     assert simulate(prefix + later, end)["trades_closed"] == 0
     assert simulate(prefix + later, end)["net_realized_pnl_usd"] == 0
+
+
+def test_unrealized_never_reads_future_price_outside_eval_window():
+    original = sample() + [m5(27, 102.7, 103.0, 101.8, 102.9)]
+    lock = replace(config(), end_utc=28 * 300)
+    baseline = simulate(original, lock)
+    future = simulate(original + [m5(28, 400.0, 500.0, 1.0, 250.0)], lock)
+    assert baseline["trades_closed"] == 0
+    assert baseline["unrealized_mark_to_market_usd_estimate"] is not None
+    assert baseline["unrealized_mark_to_market_usd_estimate"] == future["unrealized_mark_to_market_usd_estimate"]
