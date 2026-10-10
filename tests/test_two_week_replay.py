@@ -33,7 +33,10 @@ def test_market_entry_occurs_next_open_and_both_hit_bar_stops_first():
     r = simulate(bars, config())
     assert r["trades_closed"] == 1
     trade = r["trades"][0]
-    assert trade["signal_time_utc"] != trade["entry_time_utc"]
+    # The previous candle CLOSE and next candle OPEN share the same UTC boundary.
+    # The signal-bar start proves the decision used the EARLIER candle only.
+    assert trade["signal_time_utc"] == trade["entry_time_utc"]
+    assert trade["signal_bar_open_utc"] != trade["entry_time_utc"]
     assert trade["entry_time_utc"].startswith("1970-01-01T02:15:")
     assert trade["reason"] == "STOP_OR_AMBIGUOUS_STOP_FIRST"
     assert trade["net_usd"] < 0
@@ -93,3 +96,11 @@ def test_pnl_shrinks_with_higher_adverse_slippage():
     assert lower["trades_closed"] == 1
     assert higher["trades_closed"] == 1
     assert higher["net_realized_pnl_usd"] <= lower["net_realized_pnl_usd"]
+
+
+def test_replay_never_counts_trades_after_test_end():
+    prefix = sample()
+    end = config(end_utc=27 * 300)
+    later = [m5(27, 102.7, 107.0, 100.0, 105)]
+    assert simulate(prefix + later, end)["trades_closed"] == 0
+    assert simulate(prefix + later, end)["net_realized_pnl_usd"] == 0
