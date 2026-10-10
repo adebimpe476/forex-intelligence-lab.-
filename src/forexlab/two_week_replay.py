@@ -134,7 +134,7 @@ def _orderflow_gate(proposal: Proposal, current_end_ms: int,
     if not current or not previous:
         return False
     if (current.start_ms + 300_000 != current_end_ms
-            or previous.start_ms + 300_000 > current.start_ms):
+            or previous.start_ms + 300_000 != current.start_ms):
         return False
     # Conservative preliminary hypothesis, NOT tuned, NOT profitable by definition.
     if proposal.side == "BUY":
@@ -191,6 +191,7 @@ def simulate(
         peak_equity = max(peak_equity, equity)
         max_closed_dd = max(max_closed_dd, peak_equity - equity)
         closed.append({**p["record"], "exit_time_utc": _d(current.time),
+                       "exit_time_precision": "M5_BAR_OPEN_ONLY_EXCEPT_OPEN_EXITS",
                        "exit": round(execution_price, 7), "reason": reason,
                        "net_usd": round(net, 2),
                        "equity_after_usd": round(equity, 2),
@@ -199,6 +200,8 @@ def simulate(
 
     for i, bar in enumerate(bars):
         bar.validate()
+        if bar.time >= config.end_utc:
+            break  # Do not process ANY candle outside the pre-registered test end.
         if previous and bar.time <= previous.time:
             raise ValueError("History must be time-ordered and unique")
         gap = previous is not None and bar.time != previous.time + 300
@@ -253,6 +256,7 @@ def simulate(
                                 "lot": lot, "opened_time": bar.time,
                                 "bars_held": 0, "be_ready": False, "be_moved": False,
                                 "record": {
+                                    "signal_bar_open_utc": _d(prior_proposal.candle_time),
                                     "signal_time_utc": _d(prior_proposal.candle_time + 300),
                                     "entry_time_utc": _d(bar.time), "symbol": config.symbol,
                                     "side": prior_proposal.side,
@@ -321,10 +325,7 @@ def simulate(
 
         # 3. Only AFTER this bar is completely closed do we let the detector
         # inspect it and generate a signal for the following bar. Never pass future.
-        if previous is None or not gap:
-            recent.append(Candle(bar.time, bar.open, bar.high, bar.low, bar.close))
-        else:
-            recent.append(Candle(bar.time, bar.open, bar.high, bar.low, bar.close))
+        recent.append(Candle(bar.time, bar.open, bar.high, bar.low, bar.close))
         if len(recent) >= 22:
             signal = detector.advance(config.symbol, recent[-50:])
             if signal and config.start_utc <= bar.time + 300 < config.end_utc:
