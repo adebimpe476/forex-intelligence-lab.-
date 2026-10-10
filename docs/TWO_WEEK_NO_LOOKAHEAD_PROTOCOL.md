@@ -146,3 +146,54 @@ history is processed. Even with a positive two-week result, reserve
 a fresh untouched multi-week period, test realistic adverse costs, then
 forward-test live market data on a demo account before considering any
 live-money deployment.
+
+## 7. Historical futures footprint / Bookmap source acquisition (October 10, 2026)
+
+**No NQ/GC historical exchange data has been downloaded yet.** The two
+realistic paths for zero *additional* payment are:
+
+1. **Already recorded Bookmap feeds**: inspect the Windows machine's
+   `C:\\Bookmap\\Feeds` folder for genuine `.bmf` market-data recordings for
+   September 28–October 9. Bookmap's File > Record / File > Export supports
+   saved market data with depth and trade prints. Past market hours that were
+   never recorded are not magically recreated by Replay. Distinguish historical
+   recordings from the short backfill cache and confirm license terms.
+
+2. **New-user Databento historical credits**: Databento publicly advertises
+   $125 startup credits toward historical market data for eligible newly
+   registered accounts. This is **not** unrestricted free order-book history,
+   nor proof that the user has credits or that signup needs no payment method.
+   The historical CME/COMEX feed is `GLBX.MDP3`, and the volume-ranked
+   front-month continuous symbols `NQ.v.0`, `GC.v.0` must be mapped to
+   actual native contract IDs on each trading day. The `trades` schema
+   supports footprints/CVD with producer-provided aggressor side, subject to
+   `side=N` exclusions. `mbp-10` gives top-ten depth and `mbo` is full
+   order event granularity. Prices must not be merged across roll without
+   contract normalization.
+
+   **First quote historical cost, without downloading or purchasing:**
+
+   ```powershell
+   pip install databento
+   # Set $env:DATABENTO_API_KEY through your private OS secret configuration.
+   python scripts/check_databento_historical_cost.py --remaining-free-credit-usd 125
+   ```
+
+   Replace 125 with the **actual credit remaining** as displayed in the
+   provider's account portal. The script ONLY calls historical metadata
+   `get_cost` and `get_dataset_range`. It performs no orders, trade-tape
+   downloads, registration or billing operations. Review each schema and
+   instrument estimate separately; start with **trades only** rather than
+   blindly requesting all three expensive schemas.
+
+   Before a downstream orderflow backtest, genuine trade prints must be
+   converted with proper native `A=SELL`, `B=BUY`, `N=UNKNOWN` mapping
+   and verified exchange timestamp + sequence/day resets, which this project
+   does NOT yet implement for Databento DBN. No claim of complete CME/COMEX
+   absorption/heatmap is made from trades-only history.
+
+Provider documentation:
+- Databento free credits and cost estimation: https://databento.com/pricing
+- Databento historical cost method: https://databento.com/docs/api-reference-historical
+- Databento trade aggressor conventions: https://databento.com/docs/standards-and-conventions
+- Bookmap feed recording/export: https://bookmap.com/knowledgebase/docs/KB-SettingUpAndOperating-ExportImportBookmapFiles
