@@ -177,6 +177,7 @@ def simulate(
     day_base: dict[str, float] = {}
     previous: Bar | None = None
     observed_days: set[str] = set()
+    observed_bars_by_date: dict[str, int] = {}
     gap_count = 0
     candidate_count = 0
 
@@ -216,6 +217,7 @@ def simulate(
         day = _d(bar.time)[:10]
         if in_window:
             observed_days.add(day)
+            observed_bars_by_date[day] = observed_bars_by_date.get(day, 0) + 1
             day_base.setdefault(day, equity)
 
         # 1. Orders based on the PREVIOUS COMPLETED M5 candle execute now,
@@ -378,7 +380,11 @@ def simulate(
         "candidate_count": candidate_count,
         "rejections": rejects,
         "observed_utc_dates_in_window": sorted(observed_days),
+        "observed_m5_bars_by_utc_date": observed_bars_by_date,
         "window_has_at_least_eight_utc_dates": len(observed_days) >= 8,
+        "window_has_at_least_eight_well_covered_weekdays": sum(
+            count >= 100 and datetime.fromisoformat(day).weekday() < 5
+            for day, count in observed_bars_by_date.items()) >= 8,
         "gaps_across_all_loaded_bars": gap_count,
         "config": asdict(config),
         "trades": closed,
