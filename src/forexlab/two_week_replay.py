@@ -343,8 +343,8 @@ def simulate(
     # NEVER pretend open/unresolved trades earned realized profit.
     unrealized = None
     if position:
-        last = bars[-1]
-        if last.time >= config.start_utc:
+        last = previous  # most recent PROCESSED candle, never beyond end_utc
+        if last is not None and last.time >= config.start_utc:
             last_spread = last.spread_points * config.point
             mark = last.close if position["side"] == "BUY" else last.close + last_spread
             direction = 1 if position["side"] == "BUY" else -1
