@@ -121,7 +121,8 @@ def main() -> None:
         filename = args.out / f"{label}_trades.csv"
         with filename.open("w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=[
-                "signal_time_utc", "entry_time_utc", "exit_time_utc", "symbol", "side",
+                "signal_bar_open_utc", "signal_time_utc", "entry_time_utc", "exit_time_utc",
+                "exit_time_precision", "symbol", "side",
                 "broken_level", "entry", "original_sl", "tp", "lot",
                 "planned_risk_usd_with_15pct_cushion", "exit", "reason",
                 "net_usd", "equity_after_usd", "breakeven_attempted"])
